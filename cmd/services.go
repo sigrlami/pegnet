@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"github.com/pegnet/pegnet/staking"
 	"os"
 	"strings"
 	"time"
@@ -118,6 +119,19 @@ func LaunchMiners(config *config.Config, ctx context.Context, monitor common.IMo
 	return coord
 }
 
+
+
+func LaunchStaker(config *config.Config, ctx context.Context, monitor common.IMonitor) *staking.StakingCoordinator {
+	coord_s := staking.NewStakingCoordinatorFromConfig(config, monitor)
+	err := coord_s.InitStaker()
+	if err != nil {
+		panic(err)
+	}
+
+	coord_s.LaunchStaker(ctx) // Inf loop unless context cancelled
+	return coord_s
+}
+
 func LaunchMinersBatch(config *config.Config, ctx context.Context, monitor common.IMonitor, grader opr.IGrader, stats *mining.GlobalStatTracker, batchSize int) *mining.MiningCoordinator {
 	coord := mining.NewMiningCoordinatorFromConfig(config, monitor, grader, stats)
 	err := coord.InitMinters()
@@ -130,3 +144,5 @@ func LaunchMinersBatch(config *config.Config, ctx context.Context, monitor commo
 	coord.LaunchMinersBatch(ctx, batchSize)
 	return coord
 }
+
+
